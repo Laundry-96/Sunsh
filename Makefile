@@ -1,2 +1,2 @@
 all:
-	gcc sunsh.c -o sunsh
+	gcc sunsh.c shell_main.c -g -o sunsh
