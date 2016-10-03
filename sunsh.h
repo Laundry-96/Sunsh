@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
 #define LINE_BUFFER 2048
 
 /*
@@ -16,5 +18,5 @@ char **parse_input(char line[], size_t *length);
  */
 int run_sunsh();
 	
-
+void splice(char **input_arr, size_t input_length, char ***command, char ****args);
 

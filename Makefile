@@ -1,2 +1,3 @@
+CXX := -Wall -ansi -Wextra -pedantic
 all:
-	gcc sunsh.c shell_main.c -g -o sunsh
+	gcc $(CXX) sunsh.c shell_main.c -g -o sunsh
