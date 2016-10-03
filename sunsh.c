@@ -11,13 +11,12 @@ int run_sunsh()
 		test = parse_input(line, &length);
 		printf("&command = %p\n", &command);	
 		splice(test, length, &command, &args);
-		printf("&command = %p\n", &command);
-		printf("The command is: %s\n", command);
+		printf("The command is: %s\n", *command);
 		
 		id = fork();
 		if(id == 0)
 		{	
-			execv(*command, *args[0]);
+			execv(*command, *args);
 		}
 	}
 	
@@ -73,6 +72,9 @@ char **parse_input(char line[], size_t *length)
 
 void splice(char **input_arr, size_t input_length, char ***command, char ****args)
 {
+
+	printf("Starting out with the pointer cmd: %p and args: %p\n", (void*)command, (void*)args);
+	printf("Starting out with the deref cmd: %p and args: %p\n", (void*)*command, (void*)*args);
 	size_t i;
 
 	if(input_length == 0)
@@ -80,11 +82,14 @@ void splice(char **input_arr, size_t input_length, char ***command, char ****arg
 		args = NULL;
 		return;
 	}
+
 	*command = malloc(sizeof(char**));
 	*args = malloc(sizeof(char***));
 	
 	**command = malloc(strlen(input_arr[0]) * sizeof(char));
 	**args = malloc(input_length * sizeof(char*));
+
+	printf("Pointer of command = %p\nPointer of args = %p\n", (void*)*command, (void*)*args);
 
 	strcpy(**command, input_arr[0]);
 	printf("input_arr[0] = %s\ncommand = %s\n", input_arr[0], **command);
