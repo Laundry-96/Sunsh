@@ -17,6 +17,3 @@ char **parse_input(char line[], size_t *length);
  * Starts SUN SHELL
  */
 int run_sunsh();
-	
-void splice(char **input_arr, size_t input_length, char ***command, char ****args);
-
