@@ -86,16 +86,16 @@ void splice(char **input_arr, size_t input_length, char ***command, char ****arg
 	*command = malloc(sizeof(char**));
 	*args = malloc(sizeof(char***));
 	
-	**command = malloc(strlen(input_arr[0]) * sizeof(char));
+	**command = malloc((strlen(input_arr[0]) + 1) * sizeof(char));
 	**args = malloc(input_length * sizeof(char*));
 
-	printf("Pointer of command = %p\nPointer of args = %p\n", (void*)*command, (void*)*args);
+	printf("Pointer of command = %p\nPointer of args = %p\n", (void*)**command, (void*)**args);
 
 	strcpy(**command, input_arr[0]);
 	printf("input_arr[0] = %s\ncommand = %s\n", input_arr[0], **command);
 	for(i = 0; i < input_length - 1; i++)
 	{
-		**args[i] = malloc(strlen(input_arr[i+1]) * sizeof(char));
+		**args[i] = malloc((strlen(input_arr[i+1]) + 1) * sizeof(char));
 		strcpy(**args[i], input_arr[i+1]);
 	}
 	**args[i] = NULL;
