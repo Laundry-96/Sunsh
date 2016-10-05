@@ -9,15 +9,12 @@ int run_sunsh()
 		printf("SUNSH> ");
         	fgets(line, LINE_BUFFER, stdin);
 		test = parse_input(line, &length);
-		printf("&command = %p\n", &command);	
-		splice(test, length, &command, &args);
-		printf("The command is: %s\n", *command);
-		
 		id = fork();
 		if(id == 0)
 		{	
-			execv(*command, *args);
+			execv(test[0], test);
 		}
+	wait();
 	}
 	
         return 0;
@@ -37,7 +34,7 @@ char **parse_input(char line[], size_t *length)
 			i++;
 	}
 
-	arr = malloc(sizeof(char*) * counter);
+	arr = malloc(sizeof(char*) * (counter + 1));
 	rv = sprintf(buffer, line);
 	token = strtok(buffer, " \t\n");
 	i = 0;
@@ -46,6 +43,7 @@ char **parse_input(char line[], size_t *length)
 		arr[i++] = token;
 		token = strtok(NULL, " \t\n");
 	}
+	arr[i] = '\0';
 	*length = i;
 	return arr;
 }
