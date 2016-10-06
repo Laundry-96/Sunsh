@@ -20,11 +20,14 @@ int run_sunsh()
 		id = fork();
 		if(id == 0)
 		{	
-			execv(command[0], command);
+			if (execv(command[0], command) == -1)
+			{
+				printf("exec error: No such file or directory\n");
+			}
 		}
 
 		/* Wait for the process to finish */
-		wait();
+		wait(NULL);
 		
 		for(i = 0; i < commands; i++)
 		{	
