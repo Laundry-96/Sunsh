@@ -17,3 +17,7 @@ char **parse_input(char line[], size_t *length);
  * Starts SUN SHELL
  */
 int run_sunsh();
+
+char **get_command(size_t *commands);
+
+size_t get_argument_count(char line[]);

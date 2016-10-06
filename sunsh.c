@@ -1,49 +1,131 @@
 #include "sunsh.h" 
 int run_sunsh()
-{       
+{
+	/* Declare variables */
+	char **command;
+	pid_t id;
+	size_t i, commands;
+
+	/* Infinite loop for shell execution */
 	while(1)
 	{
-		char line[LINE_BUFFER], **test, **command, ***args;
-        	size_t length, i;
-		pid_t id;
-		printf("SUNSH> ");
-        	fgets(line, LINE_BUFFER, stdin);
-		test = parse_input(line, &length);
+		/* Get the command the user wants to execute */
+		command = get_command(&commands);
+		
+		/* Check for a valid command, and if not, try again */
+		if(command == NULL)
+			continue;
+		
+		/* Everything is dandy; execute the statement */
 		id = fork();
 		if(id == 0)
 		{	
-			execv(test[0], test);
+			execv(command[0], command);
 		}
-	wait();
+
+		/* Wait for the process to finish */
+		wait();
+		
+		for(i = 0; i < commands; i++)
+		{	
+			free(command[i]);
+			command[i] = NULL;
+		}
+
+		free(command);
+		command = NULL;
 	}
-	
+		
+	/* Exit with no errors :) */
         return 0;
 }
 
 char **parse_input(char line[], size_t *length)
 {
-	size_t counter = 0, i;
+	/* Declare variables */
+	size_t i;
 	int rv;
 	char buffer[LINE_BUFFER], **arr, *token;
-	for(i = 0; line[i] != '\0'; i++)
-	{
-		if(line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
-			{ counter++; i++; }
 
-		if(line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
-			i++;
+	/* Initialize variables */
+	/* Initialize get_argument_count + 1 because we must account for trailing null */
+	arr = malloc(sizeof(char*) * (get_argument_count(line) + 1));
+	i = 0;
+
+	/* Error check */
+	if(arr == NULL)
+	{
+		printf("UNABLE TO ALLOCATE MEMORY!\n EXITING!");
+		exit(-1);
 	}
 
-	arr = malloc(sizeof(char*) * (counter + 1));
-	rv = sprintf(buffer, line);
+	if(sprintf(buffer, line) < 0)
+	{
+		printf("ERROR! SPRINTF() RETURNED A NEGATIVE VALUE!\n");
+		printf("TRY AGAIN!\n");
+		return NULL;
+	}
+
+	/* Everything is dandy; tokenize the string */
 	token = strtok(buffer, " \t\n");
-	i = 0;
+
 	while(token)
 	{
-		arr[i++] = token;
+		/* Use strlen(token) + 1 because it doesn't include terminating char */
+		arr[i] = malloc((strlen(token) + 1) * sizeof(char));
+		strcpy(arr[i], token);
+		i++;
 		token = strtok(NULL, " \t\n");
 	}
-	arr[i] = '\0';
+
+	/* Don't forget to set the last argument to NULL for execv()! */
+	arr[i] = malloc(sizeof(char));
+	arr[i++] = '\0';
+	
+	/* Assign length for deallocation */
 	*length = i;
+
 	return arr;
+}
+
+char **get_command(size_t *commands)
+{
+	/* Declare variables */
+	char input_line[LINE_BUFFER];
+	size_t length;
+	int fgets_return;
+
+	/* Print the shell line and get user input */
+	printf("SUNSH> ");
+
+	/* Error check */
+	if(fgets(input_line, LINE_BUFFER, stdin) == 0)
+	{
+		printf("ERROR ON LINE PARSING!\n TRY AGAIN!\n");
+		return NULL;
+	}
+
+	/* Return the parsed input */
+	return parse_input(input_line, commands);
+}
+
+size_t get_argument_count(char line[])
+{
+	size_t counter, i;
+
+	counter = 0;
+	
+	for(i = 0; line[i] != '\0'; i++)
+        {
+                if(line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
+                {
+			counter++; 
+			i++; 
+		}
+
+                while(line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
+                        i++;
+        }
+	
+	return counter;
 }
