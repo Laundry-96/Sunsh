@@ -30,7 +30,7 @@ int run_sunsh()
 		wait(NULL);
 		
 		for(i = 0; i < commands; i++)
-		{	
+		{
 			free(command[i]);
 			command[i] = NULL;
 		}
@@ -47,7 +47,6 @@ char **parse_input(char line[], size_t *length)
 {
 	/* Declare variables */
 	size_t i;
-	int rv;
 	char buffer[LINE_BUFFER], **arr, *token;
 
 	/* Initialize variables */
@@ -82,7 +81,8 @@ char **parse_input(char line[], size_t *length)
 	}
 
 	/* Don't forget to set the last argument to NULL for execv()! */
-	arr[i] = malloc(sizeof(char));
+	/* NOTE: We don't malloc here because we are not creating a string */
+	/* If anything, we should free(arr[i]), and then call malloc(sizeof(char)) */
 	arr[i++] = '\0';
 	
 	/* Assign length for deallocation */
@@ -95,8 +95,6 @@ char **get_command(size_t *commands)
 {
 	/* Declare variables */
 	char input_line[LINE_BUFFER];
-	size_t length;
-	int fgets_return;
 
 	/* Print the shell line and get user input */
 	printf("SUNSH> ");
