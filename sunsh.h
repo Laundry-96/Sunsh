@@ -18,6 +18,14 @@ char **parse_input(char line[], size_t *length);
  */
 int run_sunsh();
 
+/*
+ * get_command(size_t *commands)
+ * return: asks for user input, and splits it upon encountering white space
+ */
 char **get_command(size_t *commands);
 
+/*
+ * get_argument_count(char line[])
+ * returns: the amount of arguments the user put in
+ */
 size_t get_argument_count(char line[]);
