@@ -30,3 +30,10 @@ char **get_command(size_t *commands);
  * returns: the amount of arguments the user put in
  */
 size_t get_argument_count(char line[]);
+
+/*
+ * built_in(char** command)
+ * returns an int if command is a built in shell command
+ * 1 if true, 0 if false
+ */
+int built_in(char** command);

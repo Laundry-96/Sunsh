@@ -16,19 +16,27 @@ int run_sunsh()
 		if(command == NULL)
 			continue;
 		
-		/* Everything is dandy; execute the statement */
-		id = fork();
-		if(id == 0)
-		{	
-			if (execvp(command[0], command) == -1)
-			{
-				printf("exec error: No such file or directory\n");
+		/* Make sure command isn't a built in shell command
+		else if(built_in(command))
+			continue; /*shell_execute(command);*/
+
+		/* Command is a program to be run */
+		else
+		{
+			/* Everything is dandy; execute the statement */
+			id = fork();
+			if(id == 0)
+			{	
+				if (execvp(command[0], command) == -1)
+				{
+					printf("exec error: No such file or directory\n");
+				}
 			}
+
+			/* Wait for the process to finish */
+			wait(NULL);
 		}
 
-		/* Wait for the process to finish */
-		wait(NULL);
-		
 		for(i = 0; i < commands; i++)
 		{
 			free(command[i]);
