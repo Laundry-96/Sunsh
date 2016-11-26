@@ -16,7 +16,7 @@ int run_sunsh()
 		if(command == NULL)
 			continue;
 		
-		/* Make sure command isn't a built in shell command
+		/* Make sure command isn't a built in shell command */
 		else if(built_in(command))
 			continue; /*shell_execute(command);*/
 
@@ -137,4 +137,24 @@ size_t get_argument_count(char line[])
         }
 	
 	return counter;
+}
+
+int built_in(char **command)
+{
+	if(command == NULL)
+		return 0;
+	else if(strcmp(*command, "cd") == 0)
+		return 1;
+	else if(strcmp(*command, "exit") == 0)
+		return 1;
+	else if(strcmp(*command, "chdir") == 0)
+		return 1;
+	else if(strcmp(*command, "getenv") == 0)
+		return 1;
+	else if(strcmp(*command, "setenv") == 0)
+		return 1;
+	else if(strcmp(*command, "echo") == 0)
+		return 1;
+	else
+		return 0;
 }
