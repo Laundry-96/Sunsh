@@ -2,9 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #define LINE_BUFFER 2048
+
+/* Even indexes are environment name, odd are environment values */
+extern char **env;
+extern size_t env_length;
 
 /*
  * parse_input(char line[])
@@ -20,10 +25,10 @@ char **parse_input(char line[], size_t *length);
 int run_sunsh();
 
 /*
- * get_command(size_t *commands)
+ * get_command(size_t *commands, char **full_command)
  * return: asks for user input, and splits it upon encountering white space
  */
-char **get_command(size_t *commands);
+char **get_command(size_t *commands, char **full_command);
 
 /*
  * get_argument_count(char line[])
@@ -37,3 +42,9 @@ size_t get_argument_count(char line[]);
  * 1 if true, 0 if false
  */
 int built_in(char** command);
+
+/*
+ * shell_execute(char **commands, size_t args)
+ * executes built in commands
+ */
+void shell_execute(char **commands, size_t args, char *full_command);
