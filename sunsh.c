@@ -64,11 +64,15 @@ char **parse_input(char line[], size_t *length)
 	/* Declare variables */
 	size_t i;
 	char buffer[LINE_BUFFER], **arr, *token;
+	/* Used to check if setenv command. Special things need to be done for this. */
+	int first_run;
 
 	/* Initialize variables */
 	/* Initialize get_argument_count + 1 because we must account for trailing null */
+	/* IF SETENV RETURN 2 */
 	arr = malloc(sizeof(char*) * (get_argument_count(line) + 1));
 	i = 0;
+	first_run = 1;
 
 	/* Error check */
 	if(arr == NULL)
@@ -84,17 +88,48 @@ char **parse_input(char line[], size_t *length)
 		return NULL;
 	}
 
-	/* Everything is dandy; tokenize the string */
-	token = strtok(buffer, " \t\n");
+	for(i = 0; buffer[i] != EOF
 
-	while(token)
+	/* REMOVING STRTOK TO PARSE BY HAND */
+	/* Everything is dandy; tokenize the string */
+	/* token = strtok(buffer, " \t\n");*/
+	
+	while(false)
 	{
 		/* Use strlen(token) + 1 because it doesn't include terminating char */
 		arr[i] = malloc((strlen(token) + 1) * sizeof(char));
 		strcpy(arr[i], token);
 		i++;
+
+		/* If this is our first run */
+		if(first_run)
+		{
+			/* Check if we want to use setenv */
+			if(strcmp(arr[0], "setenv") == 0)
+			{
+				/* Parse the rest of the string as one string for putenv */
+				token = strtok(NULL, "\0");
+				arr[i] = malloc(strlen(token + 1) * sizeof(char));
+				strcpy(arr[i], token);
+				i++;
+				
+				/* Set the last argument to NULL */
+				arr[i++] = '\0';
+
+				/* Assign length for deallocation */
+				*length = i;
+
+				/* Return the array */
+				return arr;
+			}
+
+			/* Set first run to false */
+			first_run = 0;
+		}
+
 		token = strtok(NULL, " \t\n");
 	}
+	/* REMOVING STRTOK TO PARSE BY HAND */
 
 	/* Don't forget to set the last argument to NULL for execv()! */
 	/* NOTE: We don't malloc here because we are not creating a string */
@@ -132,11 +167,45 @@ char **get_command(size_t *commands, char **full_command)
 size_t get_argument_count(char line[])
 {
 	size_t counter, i;
+	char* first_command;
+	int first_command_found;
 
 	counter = 0;
-	
+	first_command_found = 0;
+
+	/* "setenv" is 6 characters long and that's all we need */
+	first_command = malloc(sizeof(char) * 6); 
+	if(first_command == NULL)
+		return 0;
+
+	/* Set first_command to all null chars */
+	for(i = 0; i < 6; i++)
+		first_command[i] = '\0';
+
 	for(i = 0; line[i] != '\0'; i++)
 	{
+		/* If we have found the first command */
+		if(!first_command_found)
+		{
+			/* While we are going through whitespace */
+			while((line[i] == ' ' || line[i] == '\t' || line[i] == '\n'))
+				i++;
+
+			/* If there is no character after the whitespace */
+			if(line[i] == '\0')
+				return 0;
+
+			/* While there are characters to read, and we have yet to read 6 characters */
+			while(line[i] != '\0' && first_command_found < 6)
+			{
+				first_command[first_command_found++] = line[i++];
+			}	
+
+			/* If it's setenv, we need 3 parameters, 1 for setenv, 2 for rest of string, 3 for null */
+			if(strcmp(first_command, "setenv") == 0)
+				return 3;
+		}
+
 		if(line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
 		{
 			counter++; 
@@ -234,6 +303,6 @@ void shell_execute(char **command, size_t args, char *full_command)
 	/* Setenv */
 	else if(strcmp(*command, "setenv") == 0)
 	{
-		printf("%s\n", full_command);
+		printf("%s\n", command[1]);
 	}
 }
