@@ -47,8 +47,11 @@ int run_sunsh()
 
 		for(i = 0; i < commands; i++)
 		{
-			free(command[i]);
-			command[i] = NULL;
+			if(command[i] != NULL || command[i] != '\0')
+			{
+				free(command[i]);
+				command[i] = NULL;
+			}
 		}
 
 		free(command);
@@ -62,82 +65,168 @@ int run_sunsh()
 char **parse_input(char line[], size_t *length)
 {
 	/* Declare variables */
-	size_t i;
-	char buffer[LINE_BUFFER], **arr, *token;
-	/* Used to check if setenv command. Special things need to be done for this. */
-	int first_run;
+	size_t i, j;
+	char buffer[LINE_BUFFER], **arr, **swap;
+	
+	/* Prepare alloc for trailing NULL */
+	arr = NULL;
+	swap = NULL;
 
-	/* Initialize variables */
-	/* Initialize get_argument_count + 1 because we must account for trailing null */
-	/* IF SETENV RETURN 2 */
-	arr = malloc(sizeof(char*) * (get_argument_count(line) + 1));
 	i = 0;
-	first_run = 1;
+	j = 0;
 
-	/* Error check */
-	if(arr == NULL)
-	{
-		printf("UNABLE TO ALLOCATE MEMORY!\n EXITING!");
-		exit(-1);
-	}
-
-	if(sprintf(buffer, line) < 0)
+	if(snprintf(buffer, LINE_BUFFER, line) < 0)
 	{
 		printf("ERROR! SPRINTF() RETURNED A NEGATIVE VALUE!\n");
 		printf("TRY AGAIN!\n");
 		return NULL;
 	}
-
-	for(i = 0; buffer[i] != EOF
-
-	/* REMOVING STRTOK TO PARSE BY HAND */
-	/* Everything is dandy; tokenize the string */
-	/* token = strtok(buffer, " \t\n");*/
 	
-	while(false)
+	for(i = 0; buffer[j] != '\0'; i++)
 	{
-		/* Use strlen(token) + 1 because it doesn't include terminating char */
-		arr[i] = malloc((strlen(token) + 1) * sizeof(char));
-		strcpy(arr[i], token);
-		i++;
+		size_t actual_size;
+		size_t malloc_multiplier;
+		char *arg;
+		int entered;
 
-		/* If this is our first run */
-		if(first_run)
+		printf("%c\n", buffer[j]);
+		malloc_multiplier = 1;
+		entered = 0;
+
+		/* Allocate a set amount of space for stuff */
+		arg = calloc(STR_LENGTH * malloc_multiplier, sizeof(char));
+		actual_size = 0;
+		
+		/* While we're at meaningless white space... */
+		while(buffer[j] == ' ' || buffer[j] == '\t' || buffer[j] == '\n')
+			++j;
+
+		while(buffer[j] != ' ' && buffer[j] != '\t' && buffer[j] != '\n' && buffer[j] != '\0')
 		{
-			/* Check if we want to use setenv */
-			if(strcmp(arr[0], "setenv") == 0)
+			entered = 1;
+
+			/* We found an escaped quote! Increment j so we don't get hung up on the same char */
+			if(buffer[j++] == '\"')
 			{
-				/* Parse the rest of the string as one string for putenv */
-				token = strtok(NULL, "\0");
-				arr[i] = malloc(strlen(token + 1) * sizeof(char));
-				strcpy(arr[i], token);
-				i++;
-				
-				/* Set the last argument to NULL */
-				arr[i++] = '\0';
+				/* We must go until we find the next unescaped quote */
+				while(buffer[j] != '\"')
+				{
+					/* Check if we have an escape character '/' */
+					if(buffer[j] == '/')
+					{
+						/* Interesting... Just add the escape character I guess...*/
+						if(buffer[j+1] == '\0')
+						{
+							arg[actual_size++] = buffer[j++];
+						}
+						
+						/* Add the next character no matter what, we'll escape it later */
+						/* Just used for escaping the quote, but anything else will do */
+						/* Don't worry if it's an octal value because the numbers will still be copied */
+						else
+						{
+							arg[actual_size++] = buffer[j++];
+							arg[actual_size++] = buffer[j++];
+						}
+					}
 
-				/* Assign length for deallocation */
-				*length = i;
+					/* COPY EVERYTHING */
+					else
+					{
+						arg[actual_size++] = buffer[j++];
+					}
 
-				/* Return the array */
-				return arr;
+					/* Check for size of array */
+					if(actual_size >= (STR_LENGTH * malloc_multiplier) - 4)
+					{
+						char *swap;
+						swap = realloc(arg, (STR_LENGTH * ++malloc_multiplier));
+						
+						/* Check NULL */
+						if(swap == NULL)
+						{
+							printf("Error: No more memory :'(\n");
+							free(arg);
+							return NULL;
+						}
+
+						arg = swap;
+					}
+
+				}
+
+				/* Add the end quote */
+				arg[actual_size++] = buffer[j++];
 			}
 
-			/* Set first run to false */
-			first_run = 0;
+			else
+			{
+				arg[actual_size++] = buffer[j++];
+			}
+
+			/* Check for size of array */
+			if(actual_size >= (STR_LENGTH * malloc_multiplier) - 4)
+			{
+				char *swap;
+				swap = realloc(arg, (STR_LENGTH * ++malloc_multiplier));
+					
+				/* Check NULL */
+				if(swap == NULL)
+				{
+					printf("Error: No more memory :'(\n");
+					free(arg);
+					return NULL;
+				}
+
+				arg = swap;
+			}
+
 		}
 
-		token = strtok(NULL, " \t\n");
+		/* If there is another variable to add */
+		if(entered)
+		{
+			/* Allocate space */
+			swap = realloc(arr, sizeof(char*) * i+1);
+			
+			/* NULL check */
+			if(swap == NULL)
+			{
+				printf("Error allocating memory...\n");
+				free(arr);
+				return NULL;
+			}
+			
+			arr = swap;
+			arr[i] = arg;
+		}
+
+		/* Free the calloc */
+		else
+		{
+			/* We didn't have a variable, so we need to decrement our argument count, and free the calloc */
+			i--;
+			free(arg);
+		}
 	}
-	/* REMOVING STRTOK TO PARSE BY HAND */
 
 	/* Don't forget to set the last argument to NULL for execv()! */
-	/* NOTE: We don't malloc here because we are not creating a string */
-	/* If anything, we should free(arr[i]), and then call malloc(sizeof(char)) */
-	arr[i++] = '\0';
+	/* Allocate space */
 	
+	swap = realloc(arr, sizeof(char*) * i+1);
+	
+	/* NULL check */
+	if(swap == NULL)
+	{
+		printf("Error allocating memory...\n");
+		free(arr);
+		return NULL;
+	}
+	
+	arr[i++] = '\0';
 	/* Assign length for deallocation */
 	*length = i;
+	printf("length = %d\n", i);
 
 	return arr;
 }
