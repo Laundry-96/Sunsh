@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #define LINE_BUFFER 2048
-
+#define STR_LENGTH 64
 /* Even indexes are environment name, odd are environment values */
 extern char **env;
 extern size_t env_length;

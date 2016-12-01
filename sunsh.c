@@ -34,7 +34,8 @@ int run_sunsh()
 			/* Everything is dandy; execute the statement */
 			id = fork();
 			if(id == 0)
-			{	
+			{
+				printf("Command: %s\n", command[0]);	
 				if (execvp(command[0], command) == -1)
 				{
 					printf("exec error: No such file or directory\n");
@@ -89,7 +90,6 @@ char **parse_input(char line[], size_t *length)
 		char *arg;
 		int entered;
 
-		printf("%c\n", buffer[j]);
 		malloc_multiplier = 1;
 		entered = 0;
 
@@ -106,28 +106,19 @@ char **parse_input(char line[], size_t *length)
 			entered = 1;
 
 			/* We found an escaped quote! Increment j so we don't get hung up on the same char */
-			if(buffer[j++] == '\"')
+			if(buffer[j] == '\"')
 			{
+				/* Don't forget to add that quote! */
+				arg[actual_size++] = buffer[j++];
+
 				/* We must go until we find the next unescaped quote */
 				while(buffer[j] != '\"')
 				{
 					/* Check if we have an escape character '/' */
 					if(buffer[j] == '/')
 					{
-						/* Interesting... Just add the escape character I guess...*/
-						if(buffer[j+1] == '\0')
-						{
-							arg[actual_size++] = buffer[j++];
-						}
-						
-						/* Add the next character no matter what, we'll escape it later */
-						/* Just used for escaping the quote, but anything else will do */
-						/* Don't worry if it's an octal value because the numbers will still be copied */
-						else
-						{
-							arg[actual_size++] = buffer[j++];
-							arg[actual_size++] = buffer[j++];
-						}
+						arg[actual_size++] = buffer[j++];
+						arg[actual_size++] = buffer[j++];
 					}
 
 					/* COPY EVERYTHING */
@@ -222,7 +213,7 @@ char **parse_input(char line[], size_t *length)
 		free(arr);
 		return NULL;
 	}
-	
+	arr = swap;	
 	arr[i++] = '\0';
 	/* Assign length for deallocation */
 	*length = i;
