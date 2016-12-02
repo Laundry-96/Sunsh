@@ -177,6 +177,27 @@ char **parse_input(char line[], size_t *length)
 		/* If there is another variable to add */
 		if(entered)
 		{
+			char *other_string_for_null_alloc;
+
+			arg = unescape(arg, NULL);
+
+			if(arg == NULL)
+			{
+				/* RIP */
+				return NULL;
+			}
+
+			other_string_for_null_alloc = realloc(arg, sizeof(char*) * actual_size++);
+
+			if(other_string_for_null_alloc == NULL)
+			{
+				printf("No memory\n");
+				return NULL;
+			}
+
+			other_string_for_null_alloc[actual_size] = '\0';
+			arg = other_string_for_null_alloc;
+
 			/* Allocate space */
 			swap = realloc(arr, sizeof(char*) * i+1);
 			
