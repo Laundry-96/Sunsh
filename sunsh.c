@@ -328,27 +328,68 @@ void shell_execute(char **command, size_t args, char *full_command)
 
 		/* Make sure we have an environment variable to get */
 		if(args != 3)
-			printf("Invalid number of arguments. Only one argument accepted\n");
-
-		/* NULL check */
-		if(env_length != 0)
 		{
-			for(i = 0; i < env_length; i+=2)
-			{
-				if(strcmp(command[1], env[i]) == 0)
-				{
-					printf("%s", env[i+1]);
-					break;
-				}
-			}
+			printf("Invalid number of arguments. Only one argument accepted\n");
+			return;
 		}
 
+		printf("Asking for %s\n", command[1]);
+		printf("%s", getenv(command[1]));
 		printf("\n");
 	}
 
 	/* Setenv */
 	else if(strcmp(*command, "setenv") == 0)
 	{
-		printf("%s\n", command[1]);
+		int ret, i, j, eq_id;
+		int string_len;
+		char *stra, *strb;
+		string_len = 0;
+		i = 0;
+		if(args <= 2)
+		{
+			printf("Not enough args\n");
+			return;
+		}
+		
+		/* Copy strings for environment variable stuff! */
+
+		while(command[1][i++] != '=')
+		{
+				string_len++;
+		}
+
+		/* Copy first half of equation */
+		stra = malloc(sizeof(char) * (string_len + 1));
+			
+		for(j = 0; j < string_len; j++)
+			stra[j] = command[1][j];
+		stra[j] = '\0';	
+		
+		/* Reset for second half */
+		string_len = 0;
+		eq_id = i;
+
+		while(command[1][i++] != '\0')
+		{
+			string_len++;
+		}
+
+		strb = malloc(sizeof(char) * (string_len +1));
+		for(j = 0; j < string_len; j++)
+			strb[j] = command[1][eq_id+j];
+		strb[j] = '\0';
+		
+		printf("a: %s\n", stra);
+		printf("b: %s\n", strb);
+
+
+		ret = setenv(stra, strb, 1);
+
+		if(ret != 0)
+		{
+			printf("Error occured while trying to set environmemt variable\n");
+			return;
+		}
 	}
 }
