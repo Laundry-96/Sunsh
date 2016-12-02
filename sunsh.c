@@ -9,7 +9,7 @@ int run_sunsh()
 	char **command, *full_command;
 	pid_t id;
 	size_t i, commands;
-	
+
 	/* set environment to null */
 	env = NULL;
 	env_length = 0;
@@ -40,10 +40,10 @@ int run_sunsh()
 				{
 					printf("exec error: No such file or directory\n");
 				}
+				
+				/* Wait for the process to finish */
+				wait(NULL);
 			}
-
-			/* Wait for the process to finish */
-			wait(NULL);
 		}
 
 		for(i = 0; i < commands; i++)
@@ -359,8 +359,6 @@ void shell_execute(char **command, size_t args, char *full_command)
 	/* Getenv */
 	else if(strcmp(*command, "getenv") == 0)
 	{
-		size_t i;
-
 		/* Make sure we have an environment variable to get */
 		if(args != 3)
 		{
