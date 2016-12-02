@@ -131,7 +131,7 @@ char **parse_input(char line[], size_t *length)
 					if(actual_size >= (STR_LENGTH * malloc_multiplier) - 4)
 					{
 						char *swap;
-						swap = realloc(arg, (STR_LENGTH * ++malloc_multiplier));
+						swap = realloc(arg, (sizeof(char) * (STR_LENGTH * ++malloc_multiplier)));
 						
 						/* Check NULL */
 						if(swap == NULL)
@@ -159,7 +159,7 @@ char **parse_input(char line[], size_t *length)
 			if(actual_size >= (STR_LENGTH * malloc_multiplier) - 4)
 			{
 				char *swap;
-				swap = realloc(arg, (STR_LENGTH * ++malloc_multiplier));
+				swap = realloc(arg, (sizeof(char) * (STR_LENGTH * ++malloc_multiplier)));
 					
 				/* Check NULL */
 				if(swap == NULL)
