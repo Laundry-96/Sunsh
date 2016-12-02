@@ -1,3 +1,6 @@
+#ifndef SUNSH_C
+#define SUNSH_C
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -5,6 +8,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <limits.h>
+#include "utils.h"
 #define LINE_BUFFER 2048
 #define STR_LENGTH 64
 /* Even indexes are environment name, odd are environment values */
@@ -48,3 +53,10 @@ int built_in(char** command);
  * executes built in commands
  */
 void shell_execute(char **commands, size_t args, char *full_command);
+
+/*
+ * trim_begin(char *string)
+ * Removes whitespace at the beggining of the string
+ */
+char *trim_begin(char *string);
+#endif

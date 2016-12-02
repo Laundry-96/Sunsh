@@ -287,9 +287,44 @@ int built_in(char **command)
 
 void shell_execute(char **command, size_t args, char *full_command)
 {
+	int ret;
+	char *cwd;
+
 	/* Change directory */
 	if(strcmp(*command, "cd") == 0 || strcmp(*command, "chdir") == 0)
-		printf("chdir not implemented\n");
+	{
+		if(args == 2)
+		{
+			if(getenv("HOME") != NULL)
+			{
+
+				chdir(getenv("HOME"));
+				setenv("PWD", getenv("HOME"), 1);
+			}
+
+			printf("No HOME var... Not changing dir.\n");
+		}
+		ret = chdir(command[1]);
+
+		if(ret == 0)
+		{
+			cwd = calloc(sizeof(char), PATH_MAX);
+			if(cwd == NULL)
+			{
+				printf("Memory allocation error, not changing directory\n");
+				return;
+			}
+
+			getcwd(cwd, PATH_MAX);
+			setenv("PWD", cwd, 1);
+		}
+
+		else
+		{
+			printf("Error changing directory...\n");
+			return;
+		}
+	}
 
 	/* Exit */
 	else if(strcmp(*command, "exit") == 0)
@@ -379,7 +414,15 @@ void shell_execute(char **command, size_t args, char *full_command)
 		for(j = 0; j < string_len; j++)
 			strb[j] = command[1][eq_id+j];
 		strb[j] = '\0';
-		
+	
+		if(count_spaces(strb) > 0)
+		{
+			printf("Spaces in setting env var. Exiting\n");
+			free(stra);
+			free(strb);
+			return;
+		}
+
 		printf("a: %s\n", stra);
 		printf("b: %s\n", strb);
 
@@ -392,4 +435,24 @@ void shell_execute(char **command, size_t args, char *full_command)
 			return;
 		}
 	}
+
+	/* Echo */
+	else if(strcmp(*command, "echo") == 0)
+	{
+		char *escape;
+		
+		printf("%s", trim_begin(escape = unescape(full_command+5, NULL)));
+
+		free(escape);
+	}
+}
+
+char *trim_begin(char *string)
+{
+	int i;
+
+	for(i = 0; string[i] == ' ' || string[i] == '\t' || string[i] == '\n'; i++)
+	{}
+
+	return string+i;
 }
