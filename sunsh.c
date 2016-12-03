@@ -112,8 +112,9 @@ char **parse_input(char line[], size_t *length)
 				arg[actual_size++] = buffer[j++];
 
 				/* We must go until we find the next unescaped quote */
-				while(buffer[j] != '\"')
+				while(buffer[j] != '\"'&& buffer[j] != '\0')
 				{
+					printf("%c\n", buffer[j]);
 					/* Check if we have an escape character '/' */
 					if(buffer[j] == '/')
 					{
@@ -179,8 +180,8 @@ char **parse_input(char line[], size_t *length)
 		{
 			char *other_string_for_null_alloc;
 
-			arg = unescape(arg, NULL);
-
+			arg = unescape(arg, stderr);
+			printf("arg: %s\n", arg);
 			if(arg == NULL)
 			{
 				/* RIP */
